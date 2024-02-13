@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator cod QR</title>
+    <style>
+        body {
+            background-color: #2B124C;
+            display: flex;
+            justify-content: center; /* Aici centrăm elementele pe orizontală */
+            align-items: center; /* Aici centrăm elementele pe verticală */
+            height: 100vh; /* Asigurăm că întreaga înălțime a ecranului este ocupată */
+            margin: 0; /* Eliminăm marginile implicite ale corpului paginii */
+        }
+        .container {
+            text-align: center; /* Aici centrăm textul */
+            color: #FFFF00; /* Definim culoarea textului */
+        }
+        #qrcode {
+            margin-top: 50px; /* Adăugăm un spațiu între caseta de text și codul QR */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="font-weight: 1000;">Generator cod QR</h1>
+        <label for="text">Introdu textul:</label>
+        <input type="text" id="text" placeholder="Introdu textul...">
+        <button onclick="generateQR()">Generare cod QR</button>
+        <div id="qrcode"></div>
+    </div>
+
+    <script>
+        function generateQR() {
+            var text = document.getElementById("text").value;
+            var qrDiv = document.getElementById("qrcode");
+
+            if (text) {
+                var qrUrl = 'https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=' + encodeURIComponent(text);
+                qrDiv.innerHTML = '<img src="' + qrUrl + '" alt="Cod QR">';
+            } else {
+                alert("Te rog să introduci un text pentru a genera codul QR.");
+            }
+        }
+    </script>
+</body>
+</html>
