@@ -6,41 +6,156 @@
     <title>Generator cod QR</title>
     <style>
         body {
-            background-color: #2B124C;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
-            justify-content: center; /* Aici centrăm elementele pe orizontală */
-            align-items: center; /* Aici centrăm elementele pe verticală */
-            height: 100vh; /* Asigurăm că întreaga înălțime a ecranului este ocupată */
-            margin: 0; /* Eliminăm marginile implicite ale corpului paginii */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .container {
-            text-align: center; /* Aici centrăm textul */
-            color: #FFFF00; /* Definim culoarea textului */
+            text-align: center;
+            color: #fff;
+            max-width: 300px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.1);
+            background-color: #000;
+        }
+        h1 {
+            font-weight: 900;
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #FF0066;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #FF0066;
+            font-size: 14px;
+            text-align: left;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="color"],
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            background-color: #000;
+            color: #fff;
+        }
+        button {
+            background-color: #FF0000;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            margin: 5px;
+            box-shadow: 0px 0px 20px #FF0066;
+            animation: shadow-glow 2s infinite alternate;
+        }
+        button:hover {
+            background-color: #CC0066;
+        }
+        @keyframes shadow-glow {
+            0% {
+                box-shadow: 0px 0px 20px #FF0066;
+            }
+            100% {
+                box-shadow: 0px 0px 40px #FF0066;
+            }
         }
         #qrcode {
-            margin-top: 50px; /* Adăugăm un spațiu între caseta de text și codul QR */
+            margin-top: 20px;
+        }
+        #successMessage {
+            display: none;
+            color: #00FF00;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        #downloadLink {
+            display: none;
+            color: #FF6D00;
+            text-decoration: none;
+            margin-top: 10px;
+            font-size: 14px;
+            display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 style="font-weight: 1000;">Generator cod QR</h1>
-        <label for="text">Introdu textul:</label>
-        <input type="text" id="text" placeholder="Introdu textul...">
+        <h1>Generator cod QR</h1>
+        <label for="text">Introdu textul sau adresa URL:</label>
+        <input type="text" id="text" placeholder="Introdu textul sau adresa URL...">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="width: 48%;">
+                <label for="size">Dimensiune (px):</label>
+                <input type="number" id="size" value="150">
+            </div>
+            <div style="width: 48%;">
+                <label for="color">Culoare:</label>
+                <input type="color" id="color" value="#FF0066">
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="width: 48%;">
+                <label for="errorCorrection">Corecție erori:</label>
+                <select id="errorCorrection">
+                    <option value="L">L - Low (7%)</option>
+                    <option value="M">M - Medium (15%)</option>
+                    <option value="Q">Q - Quartile (25%)</option>
+                    <option value="H">H - High (30%)</option>
+                </select>
+            </div>
+            <div style="width: 48%;">
+                <label for="margin">Margine (0-4):</label>
+                <input type="number" id="margin" value="1" min="0" max="4">
+            </div>
+        </div>
         <button onclick="generateQR()">Generare cod QR</button>
         <div id="qrcode"></div>
+        <div id="successMessage">Cod QR generat cu succes!</div>
+        <a id="downloadLink" download="qrcode.png">Descarcă codul QR</a>
     </div>
 
     <script>
-        function generateQR() {
+        async function generateQR() {
             var text = document.getElementById("text").value;
+            var size = document.getElementById("size").value;
+            var color = document.getElementById("color").value;
+            var errorCorrection = document.getElementById("errorCorrection").value;
+            var margin = document.getElementById("margin").value;
             var qrDiv = document.getElementById("qrcode");
+            var successMessage = document.getElementById("successMessage");
+            var downloadLink = document.getElementById("downloadLink");
 
             if (text) {
-                var qrUrl = 'https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=' + encodeURIComponent(text);
-                qrDiv.innerHTML = '<img src="' + qrUrl + '" alt="Cod QR">';
+                var apiUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(text)}&size=${size}x${size}&color=${color.substr(1)}&ecc=${errorCorrection}&margin=${margin}`;
+                try {
+                    var response = await fetch(apiUrl);
+                    var qrImageBlob = await response.blob();
+                    var qrImageUrl = URL.createObjectURL(qrImageBlob);
+                    qrDiv.innerHTML = `<img src="${qrImageUrl}" alt="Cod QR">`;
+                    successMessage.style.display = "block";
+                    downloadLink.href = qrImageUrl;
+                    downloadLink.style.display = "block";
+                } catch (error) {
+                    console.error('A apărut o eroare la generarea codului QR:', error);
+                    alert('A apărut o eroare la generarea codului QR. Te rog încearcă din nou mai târziu.');
+                }
             } else {
-                alert("Te rog să introduci un text pentru a genera codul QR.");
+                alert("Te rog să introduci textul sau adresa URL.");
             }
         }
     </script>
